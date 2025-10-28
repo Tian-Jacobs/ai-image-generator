@@ -139,12 +139,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Lucide](https://lucide.dev/) for the beautiful icons
 - [Tailwind CSS](https://tailwindcss.com/) for the styling framework
 
-## 📧 Contact
-
-Tian Jacobs - [@BlessedT99](https://github.com/Tian-Jacobs)
-
-Project Link: [https://github.com/Tian-Jacobs/ai-image-generator](https://github.com/Tian-Jacobs/ai-image-generator)
-
 ## 🐛 Known Issues
 
 - None currently reported
