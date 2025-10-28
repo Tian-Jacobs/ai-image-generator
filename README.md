@@ -143,7 +143,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Tian Jacobs - [@BlessedT99](https://github.com/Tian-Jacobs)
 
-Project Link: [https://github.com/BlessedT99/ai-image-generator](https://github.com/Tian-Jacobs/ai-image-generator)
+Project Link: [https://github.com/Tian-Jacobs/ai-image-generator](https://github.com/Tian-Jacobs/ai-image-generator)
 
 ## 🐛 Known Issues
 
