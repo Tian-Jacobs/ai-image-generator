@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, Share2, Heart, Sparkles, Grid, Camera } from 'lucide-react';
+import { Download, Sparkles, Grid, Camera } from 'lucide-react';
 
 // Header Component
 const Header = () => {
   return (
-    <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+    <header className="bg-gray-900 border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-center max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -20,11 +20,28 @@ const Header = () => {
 const ImageCard = ({ src, alt, onImageClick }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [imageSrc, setImageSrc] = useState(src);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 2;
+
+  const handleError = () => {
+    setIsLoading(false);
+    
+    // Retry logic for failed images
+    if (retryCount < maxRetries) {
+      setRetryCount(prev => prev + 1);
+      // Add timestamp to force reload
+      setImageSrc(`${src}${src.includes('?') ? '&' : '?'}retry=${retryCount + 1}`);
+      setIsLoading(true);
+    } else {
+      setHasError(true);
+    }
+  };
 
   return (
     <div 
       className="relative group cursor-pointer rounded-lg overflow-hidden bg-gray-800 aspect-square hover:transform hover:scale-105 transition-all duration-300"
-      onClick={() => onImageClick(src)}
+      onClick={() => !hasError && onImageClick(src)}
     >
       {isLoading && !hasError && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -41,29 +58,19 @@ const ImageCard = ({ src, alt, onImageClick }) => {
         </div>
       ) : (
         <img
-          src={src}
+          src={imageSrc}
           alt={alt}
+          loading="lazy"
           className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
           onLoad={() => setIsLoading(false)}
-          onError={() => {
-            setIsLoading(false);
-            setHasError(true);
-          }}
+          onError={handleError}
         />
       )}
       
       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-        <div className="flex space-x-2">
-          <button className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors">
-            <Heart className="w-4 h-4 text-white" />
-          </button>
-          <button className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors">
-            <Download className="w-4 h-4 text-white" />
-          </button>
-          <button className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors">
-            <Share2 className="w-4 h-4 text-white" />
-          </button>
-        </div>
+        <button className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors">
+          <Download className="w-4 h-4 text-white" />
+        </button>
       </div>
     </div>
   );
@@ -73,24 +80,24 @@ const ImageCard = ({ src, alt, onImageClick }) => {
 const Gallery = ({ images, onImageClick }) => {
   if (images.length === 0) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {/* Example gallery items using fast-loading stock images */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4">
+        {/* Example gallery items using reliable stock images */}
         {[
-          { prompt: 'cherry blossoms', id: 100 },
-          { prompt: 'city skyline', id: 101 }, 
-          { prompt: 'mountain landscape', id: 102 },
-          { prompt: 'forest pathway', id: 103 },
-          { prompt: 'ocean waves', id: 104 },
-          { prompt: 'modern architecture', id: 105 },
-          { prompt: 'sunset clouds', id: 106 },
-          { prompt: 'desert dunes', id: 107 },
-          { prompt: 'river reflection', id: 108 },
-          { prompt: 'autumn leaves', id: 109 },
-          { prompt: 'snow mountains', id: 110 },
-          { prompt: 'field flowers', id: 111 }
+          { prompt: 'cherry blossoms', id: 1 },
+          { prompt: 'city skyline', id: 2 }, 
+          { prompt: 'mountain landscape', id: 3 },
+          { prompt: 'forest pathway', id: 4 },
+          { prompt: 'ocean waves', id: 5 },
+          { prompt: 'modern architecture', id: 6 },
+          { prompt: 'sunset clouds', id: 7 },
+          { prompt: 'desert dunes', id: 8 },
+          { prompt: 'river reflection', id: 9 },
+          { prompt: 'autumn leaves', id: 10 },
+          { prompt: 'snow mountains', id: 11 },
+          { prompt: 'field flowers', id: 12 }
         ].map((item, index) => {
-          // Use fast-loading stock images from Picsum
-          const imageUrl = `https://picsum.photos/400/400?random=${item.id}`;
+          // Use Picsum with different approach - add timestamp to prevent caching issues
+          const imageUrl = `https://picsum.photos/seed/${item.id}/400/400`;
           return (
             <ImageCard
               key={index}
@@ -105,7 +112,7 @@ const Gallery = ({ images, onImageClick }) => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4">
       {images.map((image, index) => (
         <ImageCard
           key={index}
@@ -166,6 +173,7 @@ const ImageModal = ({ src, alt, isOpen, onClose }) => {
           <img
             src={src}
             alt={alt}
+            loading="lazy"
             className={`max-w-full max-h-full object-contain rounded-lg transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
           />
@@ -186,10 +194,28 @@ const ImageModal = ({ src, alt, isOpen, onClose }) => {
 // Main App Component
 const App = () => {
   const [prompt, setPrompt] = useState('');
-  const [generatedImages, setGeneratedImages] = useState([]);
+  const [generatedImages, setGeneratedImages] = useState(() => {
+    // Load images from localStorage on initial load
+    try {
+      const savedImages = localStorage.getItem('generatedImages');
+      return savedImages ? JSON.parse(savedImages) : [];
+    } catch (error) {
+      console.error('Error loading images from localStorage:', error);
+      return [];
+    }
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Save images to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('generatedImages', JSON.stringify(generatedImages));
+    } catch (error) {
+      console.error('Error saving images to localStorage:', error);
+    }
+  }, [generatedImages]);
 
   const generateImage = async () => {
     if (!prompt.trim()) return;
@@ -199,9 +225,10 @@ const App = () => {
     try {
       // Generate a random seed for variety
       const seed = Math.floor(Math.random() * 1000000);
+      const timestamp = Date.now();
       
-      // Create Pollinations API URL
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&seed=${seed}&nologo=true`;
+      // Create Pollinations API URL with timestamp to prevent caching
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&seed=${seed}&nologo=true&timestamp=${timestamp}`;
       
       // Add a small delay to show loading state and ensure image generation
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -209,8 +236,9 @@ const App = () => {
       const newImage = {
         url: imageUrl,
         prompt: prompt,
-        timestamp: Date.now(),
-        seed: seed
+        timestamp: timestamp,
+        seed: seed,
+        id: `${timestamp}-${seed}` // Unique ID to prevent React key issues
       };
       
       setGeneratedImages(prev => [newImage, ...prev]);
@@ -237,18 +265,25 @@ const App = () => {
     <div className="min-h-screen bg-gray-900 text-white">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent leading-tight px-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 px-4" style={{
+            background: 'linear-gradient(to right, rgb(96, 165, 250), rgb(168, 85, 247))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            paddingBottom: '0.15em',
+            lineHeight: '1.3'
+          }}>
             AI Image Generator
           </h1>
-          <p className="text-gray-400 text-lg mb-8 max-w-3xl mx-auto px-4 leading-relaxed">
+          <p className="text-gray-400 text-base sm:text-lg mb-6 sm:mb-8 max-w-3xl mx-auto px-4 leading-relaxed">
             Generate an image using Generative AI by describing what you want to see, all images are published publicly by default.
           </p>
 
           {/* Input Section */}
-          <div className="max-w-2xl mx-auto mb-8">
+          <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
             <div className="relative">
               <input
                 type="text"
@@ -256,12 +291,12 @@ const App = () => {
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What do you want to see?"
-                className="w-full px-6 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 sm:px-6 py-3 sm:py-4 pr-32 sm:pr-36 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
               <button
                 onClick={generateImage}
                 disabled={isGenerating || !prompt.trim()}
-                className="absolute right-2 top-2 bottom-2 px-6 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium transition-colors flex items-center space-x-2"
+                className="absolute right-2 top-2 bottom-2 px-4 sm:px-6 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium transition-colors flex items-center space-x-2 text-sm sm:text-base"
               >
                 {isGenerating ? (
                   <>
@@ -283,19 +318,19 @@ const App = () => {
         <div className="mb-8">
           {generatedImages.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 flex items-center">
-                <Grid className="w-6 h-6 mr-2" />
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center px-2">
+                <Grid className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
                 Your Generated Images
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
-                {generatedImages.map((image, index) => (
-                  <div key={index} className="relative">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 mb-8">
+                {generatedImages.map((image) => (
+                  <div key={image.id || image.timestamp} className="relative">
                     <ImageCard
                       src={image.url}
                       alt={image.prompt}
                       onImageClick={handleImageClick}
                     />
-                    <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-70 text-white text-xs p-2 rounded truncate">
+                    <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-70 text-white text-xs p-1.5 sm:p-2 rounded truncate">
                       {image.prompt}
                     </div>
                   </div>
@@ -305,7 +340,7 @@ const App = () => {
           )}
 
           <div className="text-center mb-6">
-            <p className="text-gray-400 max-w-2xl mx-auto px-4">
+            <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto px-4">
               Get inspiration from these example generations below, or create your own unique images!
             </p>
           </div>
