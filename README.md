@@ -20,7 +20,7 @@ A modern, responsive web application that generates stunning images using AI tec
 
 ## 🚀 Demo
 
-[Live Demo](#) [<!-- Add your deployed URL here -->](https://ai-image-generator-five-rouge.vercel.app/)
+[Live Demo](https://ai-image-generator-five-rouge.vercel.app/)
 
 ## 📸 Screenshots
 
